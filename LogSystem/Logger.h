@@ -9,7 +9,7 @@ public:
 	Logger& operator = (const Logger&& other) = delete;
 	Logger(const Logger& other) = delete;
 	Logger& operator = (const Logger& other) = delete;
-	Logger(const std::string& filename, bool console_output = false, size_t max_file_size_kb = 100);
+	Logger(const std::string& filename, bool console_output = false, size_t max_file_size_kb = 100, int num_threads = 3);
 	~Logger();
 	template<typename ...Args>
 	void log(LogLevel Loglevel, const std::string& format, Args&& ...args);
@@ -35,7 +35,7 @@ private:
 
 	
 
-	std::thread _work_threads;
+	std::vector<std::thread> _work_threads;
 	std::ofstream _log_file;
 	std::filesystem::path _log_dir;
 	std::atomic<bool> _exit_flag;
@@ -44,5 +44,7 @@ private:
 	size_t _max_file_size;
 	std::string _base_filename;
 	int _current_log_index = 0;
+	std::mutex _mutex;
+	int _num_threads;
 };
 

@@ -1,30 +1,35 @@
 #include "Logger.h"
 namespace fs = std::filesystem;
-Logger::Logger(const std::string& filename, bool console_output = false, size_t max_file_size_kb = 100) :_exit_flag(false)
-, _console_output(console_output), _max_file_size(max_file_size_kb * 1024), _base_filename(filename) {
+Logger::Logger(const std::string& filename, bool console_output = false, size_t max_file_size_kb = 100, int num_thread = 3) :_exit_flag(false)
+, _console_output(console_output), _max_file_size(max_file_size_kb * 1024), _base_filename(filename), _num_threads(num_thread) {
 	open_log_file();
 	if (!_log_file) {
 		throw std::runtime_error("log file open is error");
 	}
-
-	_work_threads = std::thread([this]() {
-		std::string msg;
-		while (_log_queue.pop(msg)) {
-			check_and_rotate_log_file();
-			_log_file << msg << std::endl;
-			if (_console_output) {
-				std::cout << msg << std::endl;
+	for (int i = 1; i <= _num_threads; i++) {
+		_work_threads.emplace_back(std::thread([this]() {
+			std::string msg;
+			while (_log_queue.pop(msg)) {
+				check_and_rotate_log_file();
+				_log_file << msg << std::endl;
+				if (_console_output) {
+					std::cout << msg << std::endl;
+				}
 			}
-		}
 
-		});
+			}));
+
+	}
+	
 }
 
 Logger::~Logger() {
 	_exit_flag = true;
 	_log_queue.shutdown();
-	if (_work_threads.joinable()) {
-		_work_threads.join();
+	for (auto& thread : _work_threads) {
+		if (thread.joinable()) {
+			thread.join();
+		}
 	}
 	if (_log_file.is_open()) {
 		_log_file.close();
@@ -76,7 +81,7 @@ std::string Logger::get_time() {
 
 template<typename ...Args>
 void Logger::log(LogLevel Loglevel, const std::string& format, Args&& ...args) {
-
+	std::lock_guard<std::mutex>lock(_mutex); // 锁定互斥量，确保线程安全
 	std::string loglevel_str;
 	switch (Loglevel) {
 	case LogLevel::INFO: loglevel_str = "[INFO] "; break;
@@ -88,6 +93,7 @@ void Logger::log(LogLevel Loglevel, const std::string& format, Args&& ...args) {
 
 template<typename... Args>
 void Logger::console_log(LogLevel level, const std::string& format, Args&&... args) {
+	std::lock_guard<std::mutex>lock(_mutex); // 锁定互斥量，确保线程安全
 	std::string loglevel_str;
 	switch (level) {
 	case INFO: loglevel_str = "[INFO] "; break;
