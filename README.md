@@ -47,7 +47,7 @@ A high-performance, thread-safe asynchronous logging system for C++ applications
 #### Clone and Build
 
 ```bash
-git clone https://github.com/yourusername/LogSystem.git
+git clone https://github.com/Which-W/LogSystem.git
 cd LogSystem
 mkdir build && cd build
 cmake ..
@@ -311,9 +311,9 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 
 ## 🐛 Issues & Support
 
-- 🐛 [Report Bug](https://github.com/yourusername/LogSystem/issues/new?template=bug_report.md)
-- 💡 [Request Feature](https://github.com/yourusername/LogSystem/issues/new?template=feature_request.md)
-- 💬 [Discussions](https://github.com/yourusername/LogSystem/discussions)
+- 🐛 [Report Bug](https://github.com/Which-W/LogSystem/issues/new?template=bug_report.md)
+- 💡 [Request Feature](https://github.com/Which-W/LogSystem/issues/new?template=feature_request.md)
+- 💬 [Discussions](https://github.com/Which-W/LogSystem/discussions)
 
 ## 📈 Roadmap
 
