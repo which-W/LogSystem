@@ -5,7 +5,7 @@
 [![CMake](https://img.shields.io/badge/CMake-3.8%2B-green.svg)](https://cmake.org/)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux-lightgrey.svg)](#)
 
-A high-performance, thread-safe asynchronous logging system for C++ applications featuring multi-producer single-consumer architecture with automatic log file rotation and dual output capabilities.
+A high-performance, thread-safe asynchronous logging system for C++ applications featuring multi-producer multi-consumer architecture with automatic log file rotation and dual output capabilities.
 
 ## ✨ Features
 
@@ -23,9 +23,9 @@ A high-performance, thread-safe asynchronous logging system for C++ applications
 ### Multi-Producer Single-Consumer Model
 
 ```
-[Producer Thread 1] ──┐
+[Producer Thread 1] ──┐                          [Consumer Thread] 
 [Producer Thread 2] ──┼── [Thread-Safe Queue] ── [Consumer Thread] ── [File/Console Output]
-[Producer Thread N] ──┘
+[Producer Thread N] ──┘                          [Consumer Thread] 
 ```
 
 - **Producers**: Multiple threads can safely write log messages
