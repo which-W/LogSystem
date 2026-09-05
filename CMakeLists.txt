@@ -1,15 +1,13 @@
-﻿# CMakeList.txt: 顶层 CMake 项目文件，在此处执行全局配置
-# 并包含子项目。
-#
-cmake_minimum_required (VERSION 3.8)
-
-# 如果支持，请为 MSVC 编译器启用热重载。
-if (POLICY CMP0141)
-  cmake_policy(SET CMP0141 NEW)
-  set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
+cmake_minimum_required(VERSION 3.15)
+project(LogSystem VERSION 1.0.0 LANGUAGES CXX)
+option(LOGSYSTEM_BUILD_EXAMPLE "Build the LogSystem example" ON)
+option(LOGSYSTEM_BUILD_TESTS "Build LogSystem tests" ON)
+add_subdirectory(LogSystem)
+if(LOGSYSTEM_BUILD_EXAMPLE)
+    add_executable(logsystem_example example/main.cpp)
+    target_link_libraries(logsystem_example PRIVATE LogSystem::LogSystem)
 endif()
-
-project ("LogSystem")
-
-# 包含子项目。
-add_subdirectory ("LogSystem")
+if(LOGSYSTEM_BUILD_TESTS)
+    include(CTest)
+    add_subdirectory(tests)
+endif()

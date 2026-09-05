@@ -1,17 +1,22 @@
 #pragma once
-#include "global.h"
-
+#include <chrono>
+#include <condition_variable>
+#include <cstddef>
+#include <mutex>
+#include <queue>
+#include <string>
+namespace logsystem {
 class LogQueue {
 public:
-	void push(const std::string& msg);
-
-	bool pop(std::string& msg);
-
-	void shutdown();
+    explicit LogQueue(std::size_t capacity);
+    bool push(std::string message, std::chrono::milliseconds wait_for_space);
+    bool pop(std::string& message);
+    void shutdown();
 private:
-	std::queue<std::string> _queue;
-	std::mutex _mutex;
-	std::condition_variable _con_var;
-	bool is_shutdown = false;
-
+    const std::size_t capacity_;
+    std::queue<std::string> queue_;
+    std::mutex mutex_;
+    std::condition_variable readable_, writable_;
+    bool shutdown_ = false;
 };
+} // namespace logsystem
