@@ -1,4 +1,6 @@
 #include "Logger.h"
+#include "LogQueue.h"
+#include <chrono>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -16,6 +18,20 @@ int main() {
     const auto root = std::filesystem::temp_directory_path() / "logsystem-tests";
     std::filesystem::remove_all(root); std::filesystem::create_directories(root);
     try {
+        {
+            logsystem::LogQueue queue(1);
+            if (!require(queue.push("first", std::chrono::milliseconds(0)), "initial queue push failed")
+                || !require(!queue.push("dropped", std::chrono::milliseconds(0)), "full queue did not reject non-blocking push")) return 1;
+            const auto started = std::chrono::steady_clock::now();
+            if (!require(!queue.push("warn", std::chrono::milliseconds(50)), "full queue did not time out")) return 1;
+            const auto waited = std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::steady_clock::now() - started);
+            if (!require(waited >= std::chrono::milliseconds(40), "bounded wait returned too early")) return 1;
+            std::string value;
+            if (!require(queue.pop(value) && value == "first", "queue integrity failed")) return 1;
+            queue.shutdown();
+            if (!require(!queue.pop(value), "shutdown queue did not finish after draining")) return 1;
+        }
         const auto primary = root / "application.jsonl";
         {
             logsystem::LoggerOptions options; options.service_name = "test-service"; options.file_path = primary;
